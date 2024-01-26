@@ -1,0 +1,1619 @@
+<!--Html for book appointment popup-->
+<div
+  *ngIf="
+    data?.action === 'Add' ||
+    data?.action === 'GoBack' ||
+    data?.action === 'AddSelectRep' ||
+    data?.action === 'Edit' ||
+    data?.action === 'AddAssign'
+  "
+>
+  <div class="container-fluid headerfluid">
+    <div class="row mb-4">
+      <div class="col-md-12 header">
+        <p
+          *ngIf="
+            data?.action === 'Add' ||
+            data?.action === 'GoBack' ||
+            data?.action === 'AddSelectRep' ||
+            data?.action === 'AddAssign'
+          "
+          class="heading"
+        >
+          Create New Appointment
+        </p>
+        <p *ngIf="data?.action === 'Edit'" class="heading">Edit appointment</p>
+        <i class="fa fa-times close-icon fa-lg" (click)="cancelDialog()"></i>
+      </div>
+    </div>
+  </div>
+  <div class="modal-body-appointment">
+    <form (submit)="submitform('save')" [formGroup]="appointmentFormGroup">
+      <div>
+        <div class="row">
+          <div style="margin-top: 63px">
+            <!-- SVG icon for user -->
+            <svg height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v11.5a.5.5 0 0 1-.777.416L7 13.101l-4.223 2.815A.5.5 0 0 1 2 15.5V4zm2-1a1 1 0 0 0-1 1v10.566l3.723-2.482a.5.5 0 0 1 .554 0L11 14.566V4a1 1 0 0 0-1-1H4z"></path>
+              <path d="M4.268 1H12a1 1 0 0 1 1 1v11.768l.223.148A.5.5 0 0 0 14 13.5V2a2 2 0 0 0-2-2H6a2 2 0 0 0-1.732 1z"></path>
+            </svg>
+            <!-- <label class="mylabel" for="">Appointment Title</label> -->
+            <label class="mylabel" for="">Appointment Type</label>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-select
+              id="appointmentTitle"
+              name="appointmentTitle"
+              formControlName="appointmentTitle"
+              placeholder="Select appointment title"
+            >
+              <mat-option value="">Select</mat-option>
+              <mat-option
+                *ngFor="let appointment of appointmentTypes"
+                [value]="appointment"
+              >
+                {{ appointment }}
+              </mat-option>
+              <!-- <mat-option value="BreakFast">BreakFast</mat-option>
+              <mat-option value="Lunch">Lunch</mat-option>
+              <mat-option value="Snack">Snack</mat-option>
+              <mat-option value="Dinner">Dinner</mat-option> -->
+            </mat-select>
+          </mat-form-field>
+          <div style="margin-top: -12px; margin-bottom: 5px" class="form-group">
+            <label class="mylabel" for="selecteddate">Meeting Type </label>
+          </div>
+          <div class="col-12 horizontal-align mb-1">
+            <div style="margin-left: -15px" class="form-check">
+              <input
+                type="radio"
+                id="videoMeeting"
+                name="videoMeeting"
+                [ngClass]="{
+                  'form-check-input': Invalidradiobtnmeetingtype,
+                  'valid-input': validradiobtnmeetingtype
+                }"
+                (change)="handleChangeMeetingType(0)"
+                (click)="radioSelectedMeetingType = true"
+                value="1"
+                formControlName="videoMeeting"
+              />
+              <label for="event" class="form-check-label mb-2 radio"
+                >Online</label
+              >
+            </div>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <div class="form-check">
+              <input
+                type="radio"
+                id="videoMeeting"
+                name="videoMeeting"
+                [ngClass]="{
+                  'form-check-input': Invalidradiobtnmeetingtype,
+                  'valid-input': validradiobtnmeetingtype
+                }"
+                [value]="formmodel.videoMeeting"
+                (click)="radioSelectedMeetingType = true"
+                (change)="handleChangeMeetingType(1)"
+                value="2"
+                formControlName="videoMeeting"
+              />
+              <label for="event" class="form-check-label mb-2 radio"
+                >In-Person</label
+              >
+            </div>
+          </div>
+
+          <div
+            class="col-md-12 col-12 margin-field"
+            *ngIf="superAdminRole === true"
+          >
+            <div class="form-group">
+              <label class="mylabel" for="selecteddate"
+                >Select Organization
+              </label>
+            </div>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-select
+                id="organizationId"
+                (selectionChange)="onOrganizationChange($event)"
+                name="organizationId"
+                formControlName="organizationId"
+              >
+                <mat-option value="">Select organization</mat-option>
+                <mat-option
+                  *ngFor="let org of organizations"
+                  [value]="org.organizationID"
+                >
+                  {{ org.organizationName }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6 col-6 margin-field">
+            <div class="form-group">
+              <label class="mylabel" for="selecteddate">Select Practice </label>
+            </div>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-select
+                id="medicalpracticeId"
+                name="medicalpracticeId"
+                (selectionChange)="onPracticeChange($event)"
+                formControlName="medicalPracticeId"
+                [disabled]="isPracticeDisable"
+              >
+                <mat-option value="">Select practice</mat-option>
+                <mat-option
+                  *ngFor="let prac of practices"
+                  [value]="prac.medicalPracticeId"
+                >
+                  {{ prac.organization }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6 col-6 margin-field">
+            <div class="form-group">
+              <label class="mylabel" for="selecteddate">Select Provider </label>
+            </div>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-select
+                id="physicianId"
+                name="physicianId"
+                formControlName="physicianId"
+              >
+                <mat-option value="">Select provider</mat-option>
+                <mat-option
+                  *ngFor="let phys of physicians"
+                  [value]="phys.userID"
+                >
+                  {{ phys.firstName }} {{ phys.lastName }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-12 margin-field">
+            <div class="form-group">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" style="margin-top: -3px" class="bi bi-clock mr-2" viewBox="0 0 16 16">
+                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"></path>
+                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"></path>
+              </svg>
+              &nbsp;
+              <label class="mylabel" for="selecteddate">Select Date </label>
+              <input
+                type="date"
+                class="form-control inputfield"
+                id="appointmentDate"
+                name="appointmentDate"
+                formControlName="appointmentDate"
+                [min]="today | date : 'yyyy-MM-dd'"
+                value="{{ appointmentDate.toString() | customDate }}"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 col-12 mt-2">
+            <div>
+              <label class="mylabel" for="">Start Time</label>
+            </div>
+            <div class="form-group inline-form-control horizontal-align">
+              <mat-form-field class="col-md-12 col-12" appearance="outline">
+                <input
+                  type="time"
+                  matInput
+                  value="09:00"
+                  id="startTime"
+                  name="startTime"
+                  formControlName="startTime"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-md-6 mt-2">
+            <div>
+              <label class="mylabel" for="">End Time</label>
+            </div>
+            <div class="form-group inline-form-control horizontal-align">
+              <mat-form-field class="col-md-12 col-12" appearance="outline">
+                <input
+                  type="time"
+                  matInput
+                  value="12:00"
+                  id="endTime"
+                  name="endTime"
+                  formControlName="endTime"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="mylabel" for="">Does Not Repeat</label>
+          </div>
+          <!-- <select
+            appearance="outline"
+            id="appointmentType"
+            class="form-control form-control-user"
+            name="appointmentType"
+            (change)="handleChange()"
+          >
+            <option value="">Select</option>
+            <option value="Does not repeat">Does not repeat</option>
+            <option value="Daily">Daily (Monday to Friday)</option>
+            <option value="Custom">Custom...</option>
+          </select> -->
+
+          <mat-form-field appearance="outline">
+            <mat-select
+              id="appointmentType"
+              name="appointmentType"
+              formControlName="appointmentType"
+              (change)="handleChange()"
+              placeholder="Select"
+            >
+              <!-- <mat-option value="">Select</mat-option> -->
+              <mat-option value="Does not repeat">Does Not Repeat</mat-option>
+              <mat-option value="Daily">Daily (Monday to Friday)</mat-option>
+              <mat-option value="Custom">Custom...</mat-option>
+              <!-- <mat-option
+                *ngFor="let appointment of appointmentTypes"
+                [value]="appointment"
+              >
+                {{ appointment }}
+              </mat-option> -->
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <!-- <div class="row">
+          <div class="form-group">
+            <label class="mylabel" for="selecteddate">Appointment Type </label>
+          </div>
+          <div class="col-12 horizontal-align">
+            <div style="margin-left: -15px" class="form-check">
+              <input
+                type="radio"
+                id="appointmentType"
+                name="appointmentType"
+                [ngClass]="{
+                  'form-check-input': Invalidradiobutton,
+                  'valid-input': validradiobutton
+                }"
+                (change)="handleChange(0)"
+                value="Does not repeat"
+                (click)="radioSelected = true"
+                formControlName="appointmentType"
+                [(ngModel)]="selectedAppointmentType"
+              />
+              <label for="event" class="form-check-label mb-2 radio"
+                >Does not repeat</label
+              >
+            </div>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <div class="form-check">
+              <input
+                type="radio"
+                id="appointmentType"
+                name="appointmentType"
+                [ngClass]="{
+                  'form-check-input': Invalidradiobutton,
+                  'valid-input': validradiobutton
+                }"
+                (change)="handleChange(1)"
+                (click)="radioSelected = true"
+                value="Recurring"
+                formControlName="appointmentType"
+                [(ngModel)]="selectedEventType"
+              />
+              <label for="event" class="form-check-label mb-2 radio"
+                >Recurring</label
+              >
+            </div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <div *ngIf="isRecurring === true" class="form-check">
+              <input
+                type="radio"
+                id="eventType"
+                name="eventType"
+                formControlName="eventType"
+                value="Weekly"
+                (change)="handleChange(2)"
+                [(ngModel)]="selectedEventType"
+              />
+              <label for="event" class="form-check-label radio">Weekly</label>
+            </div>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <div *ngIf="isRecurring === true" class="form-check">
+              <input
+                type="radio"
+                id="eventType"
+                name="eventType"
+                formControlName="eventType"
+                value="Monthly"
+                (change)="handleChange(3)"
+                [(ngModel)]="selectedEventType"
+              />
+              <label for="event" class="form-check-label mb-2 radio"
+                >Monthly</label
+              >
+            </div>
+          </div>
+        </div> -->
+
+        <div class="row">
+          <div class="col-md-8 col-12">
+            <div>
+              <label class="mylabel" for="">Notes To Rep</label>
+            </div>
+            <div>
+              <mat-form-field class="col-12" appearance="outline">
+                <input
+                  matInput
+                  id="notes"
+                  name="notes"
+                  formControlName="notes"
+                  autocomplete="off"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-md-4 col-12 mt-1">
+            <div>
+              <label class="mylabel" for="">Meal Count</label>
+            </div>
+            <div>
+              <mat-form-field class="col-12" appearance="outline">
+                <input
+                  matInput
+                  id="mealCount"
+                  name="mealCount"
+                  placeholder="mealcount"
+                  formControlName="mealCount"
+                  autocomplete="off"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 margin-field">
+            <p class="dark-color f-w-600">Appointment With</p>
+            <div class="d-inline-flex">
+              <img
+                class="small-phy-profile"
+                src="assets/images/profile-photo.jpg"
+                alt=""
+              />
+              <p style="margin-left: 10px" class="dark-color f-w-600 mt-1">
+                {{ displayRep }}
+              </p>
+              <img
+                style="height: 25px; margin-left: 12px; margin-right: 5px"
+                src="assets/images/clipboard.PNG"
+                alt=""
+              />
+              <a
+                style="text-decoration: underline"
+                class="assigntext mt-1"
+                (click)="selectRep()"
+                >Assign</a
+              >
+            </div>
+          </div>
+          <div
+            *ngIf="
+              data?.action === 'Add' ||
+              data?.action === 'GoBack' ||
+              data?.action === 'AddSelectRep' ||
+              data?.action === 'AddAssign'
+            "
+            class="col-12 d-flex justify-content-center"
+            style="margin-top: -12px"
+          >
+            <!-- <button type="submit" class="btn btn-primary btn-ok">Save</button> -->
+            <button
+              type="submit"
+              style="margin-left: 10px"
+              class="btn btn-primary btn-ok"
+              (click)="onPostClick()"
+            >
+              Post
+            </button>
+            <button
+              type="button"
+              style="width: 180px"
+              class="btn btn-primary btn-cancel custom-hover-color"
+              (click)="submitform('cancel')"
+            >
+              Cancel Appointment
+            </button>
+          </div>
+
+          <div
+            *ngIf="data?.action === 'Edit'"
+            class="col-12 d-flex justify-content-center mt-1"
+          >
+            <button
+              type="button"
+              (click)="submitform('post')"
+              class="btn btn-primary btn-ok"
+            >
+              Update
+            </button>
+            <button
+              type="button"
+              style="width: 180px"
+              class="btn btn-primary btn-cancel custom-hover-color"
+              (click)="submitform('cancel')"
+            >
+              Cancel Appointment
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!--Html for book appointment confirmation popup -->
+<div *ngIf="confirmationdata?.action === 'Confirm'">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-12 header d-flex flex-row-reverse">
+        <i class="fa fa-times close-icon fa-lg" (click)="cancelDialog()"></i>
+      </div>
+    </div>
+  </div>
+  <div class="modal-body">
+    <div style="margin-top: -25px" class="row">
+      <div class="col-md-9">
+        <h3 class="mini-title">
+          Confirm the following Appointment Details Below
+        </h3>
+      </div>
+      <div class="col-md-4 mt-2">
+        <span class="text-uppercase dark-color f-w-400 f-s">REP NAME</span>
+      </div>
+      <div class="col-md-6 mt-2">
+        <span class="f-s dark-color f-w-600">{{ displayRep }}</span>
+      </div>
+      <div class="col-md-4 mt-3">
+        <span class="text-uppercase dark-color f-w-400 f-s">DATE</span>
+      </div>
+      <div class="col-md-6 mt-3">
+        <span class="dark-color f-w-600 f-s">{{
+          confirmationdata.selectedDate
+        }}</span>
+      </div>
+      <div class="col-md-4 mt-3">
+        <span class="text-uppercase dark-color f-w-400 f-s">TIME</span>
+      </div>
+      <div class="col-md-6 mt-3">
+        <span class="dark-color f-w-600 f-s"
+          >{{ confirmationdata.startTime }} {{ confirmationdata.startPeriod }} -
+          {{ confirmationdata.endTime }} {{ confirmationdata.endPeriod }}</span
+        >
+      </div>
+      <div class="col-md-4 mt-3">
+        <span class="text-uppercase dark-color f-w-400 f-s">APPT TYPE</span>
+      </div>
+      <div class="col-md-6 mt-3">
+        <span class="dark-color f-w-600 f-s">{{
+          confirmationdata.appointmentType
+        }}</span>
+      </div>
+      <div class="col-md-4 mt-3">
+        <span class="text-uppercase dark-color f-w-400 f-s">REPEATS</span>
+      </div>
+      <div class="col-md-6 mt-3">
+        <span class="dark-color f-w-600 f-s">{{ confirmationdata.event }}</span>
+      </div>
+      <div class="col-md-4 mt-3">
+        <span class="text-uppercase dark-color f-w-400 f-s"
+          >VIDEO CONFERENCE</span
+        >
+      </div>
+      <div class="col-md-6 mt-3">
+        <span class="dark-color f-w-600 f-s">All Appointments</span>
+      </div>
+      <div class="col-md-4 mt-3">
+        <span class="text-uppercase dark-color f-w-400 f-s">FOOD DELIVERY</span>
+      </div>
+      <div class="col-md-6 mt-3">
+        <span class="dark-color f-w-600 f-s">Catering Welcome</span>
+      </div>
+      <div class="col-md-4 mt-3">
+        <span class="text-uppercase dark-color f-w-400 f-s"
+          >STAFF NOTIFICATIONS</span
+        >
+      </div>
+      <div class="col-md-6 mt-3">
+        <span class="dark-color f-w-600 f-s"
+          >Providers(0,1), Nurses(0,1), Staff(25 of 26)</span
+        >
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-12 d-flex justify-content-center">
+        <button (click)="goBack()" class="btn btn-primary btn-cancel">
+          Go Back</button
+        >&nbsp;&nbsp;&nbsp;&nbsp;
+        <button
+          style="width: 120px"
+          class="btn btn-primary btn-ok"
+          (click)="submitAppointment(confirmationdata)"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--In-office Appointment-->
+<div *ngIf="data?.action === 'Review'">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-12 header">
+        <p class="heading">{{ reviewdata.data.appointmentTitle }}</p>
+        <i class="fa fa-times close-icon fa-lg" (click)="cancelDialog()"></i>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-md-5 text-center">
+          <img src="assets/images/profile.png" class="profile-Image" />
+          <p class="primary-text mb-0 f-w-600" (click)="sendMessage()">
+            Send message
+          </p>
+          <p class="dark-color f-w-600 mb-0">
+            {{ reviewdata.data.practiceMobile }}
+          </p>
+          <p class="dark-color f-w-600 mb-0">
+            {{ reviewdata.data.practiceEmail }}
+          </p>
+          <p *ngIf="reviewdata.data.repId > 0" class="button1 f-w-600 mt-2">
+            Booked
+          </p>
+          <p
+            *ngIf="
+              reviewdata.data.repId > 0 &&
+              !reviewdata.data.isConfirmed &&
+              (currentRole == 'Rep' ||
+                currentRole == 'RepAdmin' ||
+                currentRole == 'SalesRep')
+            "
+            class="button2"
+            (click)="confirmAppointmnet()"
+          >
+            Confirm
+          </p>
+          <p
+            *ngIf="reviewdata.data.repId > 0 && reviewdata.data.isConfirmed"
+            class="button2 confirmButton"
+          >
+            Confirmed
+          </p>
+          <p
+            *ngIf="reviewdata.data.repId == 0"
+            class="confirm-btn f-w-600 mt-2"
+          >
+            Open
+          </p>
+        </div>
+        <div class="col-md-7">
+          <div class="box-info">
+            <i
+              *ngIf="isRepRole == false"
+              (click)="backToCal('edit')"
+              style="margin-right: 0px; margin-top: -10px; color: #4e73df"
+              class="fa fa-pencil-square-o fa-lg d-flex flex-row-reverse"
+            ></i>
+            <div>
+              <p class="mini-title mb-0">
+                {{ reviewdata.data.firstName }} {{ reviewdata.data.lastName }}
+              </p>
+              <p style="margin-top: 7px" class="main">
+                {{ reviewdata.data.practiceName }}
+              </p>
+              <p style="margin-top: -10px" class="main">
+                {{ reviewdata.data.practiceAddress }}
+              </p>
+              <p style="margin-top: -10px" class="main">
+                {{ reviewdata.data.practiceCity }}
+                {{ reviewdata.data.practiceState }},{{
+                  reviewdata.data.practiceZipCode
+                }}
+              </p>
+              <p class="d-flex align-items-center mb-2">
+                <span
+                  ><img
+                    class="custom-icon"
+                    src="assets/images/calicon.PNG"
+                    alt=""
+                /></span>
+                <span style="font-size: 14px" class="dark-color mini-title">{{
+                  reviewdata.data.displayDate
+                }}</span>
+              </p>
+              <p class="d-flex align-items-center mb-2">
+                <span>
+                  <img
+                    style="height: 28px; margin-right: 5px; margin-left: 2px"
+                    src="assets/images/timer.PNG"
+                    alt=""
+                  />
+                </span>
+                <span style="font-size: 14px" class="mini-title dark-color"
+                  >{{ reviewdata.data.appointmentTitle }}
+                  <span class="main"> @ </span>
+                  {{ reviewdata.data.startDisplayTime }} -
+                  {{ reviewdata.data.endDisplayTime }}
+                  {{ reviewdata.data.timeZoneAbbreviation }}</span
+                >
+              </p>
+              <p>
+                <span>
+                  <img
+                    style="height: 28px; margin-right: 5px; margin-left: 2px"
+                    src="assets/images/dinicon.PNG"
+                    alt=""
+                  />
+                </span>
+                <span class="main">Meal Count &nbsp;</span>
+                <span style="font-size: 14px" class="mini-title dark-color">{{
+                  reviewdata.data.mealCount
+                }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div *ngIf="isRepRole == false" class="col-12 text-center mt-3 mb-3">
+          <p>
+            <span
+              ><i
+                style="color: #4e73df"
+                class="fa fa-exchange fa-lg fav-icon"
+                aria-hidden="true"
+              ></i
+            ></span>
+            <span class="assigntext" (click)="transferRep()">Assign</span>
+          </p>
+        </div>
+
+        <div *ngIf="isRepRole == true" class="col-12 text-center mt-3 mb-3">
+          <p>
+            <span
+              ><i
+                style="color: #4e73df"
+                class="fa fa-exchange fa-lg fav-icon"
+                aria-hidden="true"
+              ></i
+            ></span>
+            <span class="assigntext" (click)="transferRepByRep()"
+              >Transfer</span
+            >
+          </p>
+        </div>
+
+        <div class="col-md-12 text-center mt-4">
+          <button
+            style="width: 180px"
+            class="btn btn-primary btn-cancel custom-hover-color"
+            (click)="backToCal('yes')"
+          >
+            Back to Calendar</button
+          >&nbsp;&nbsp;&nbsp;&nbsp;
+          <button
+            *ngIf="isRepRole == false"
+            style="width: 180px"
+            class="btn btn-primary btn-user"
+            (click)="backToCal('cancelappointment')"
+          >
+            Cancel Appointment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--In-office Appointment-->
+<div *ngIf="data?.action === 'ReviewBooked'">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-12 header">
+        <p class="heading">{{ reviewdata.data.appointmentTitle }}</p>
+        <i class="fa fa-times close-icon fa-lg" (click)="cancelDialog()"></i>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-md-5">
+          <p class="mini-header">Appointment with:</p>
+          <div class="row">
+            <img
+              src="assets/images/profile.png"
+              style="height: 40px; width: 65px"
+              class="col-6 profile-Image"
+            />
+            <div class="col-6">
+              <p style="margin-left: -16px" class="repName mt-1">
+                {{ reviewdata.data.firstName }} {{ reviewdata.data.lastName }}
+              </p>
+              <p
+                style="margin-left: -16px; margin-top: -7px"
+                class="mini-header"
+              >
+                {{ reviewdata.data.repOrganization }}
+              </p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-2 mt-2">
+              <img
+                src="assets/images/generic.PNG"
+                style="height: 46px; width: 40px; display: inline"
+                class="profile-Image"
+              />
+            </div>
+            <div class="col-10 mt-2">
+              <p style="margin-left: 4px" class="repName mt-1">
+                Generic :
+                {{
+                  reviewdata.data.genericName
+                    ? reviewdata.data.genericName
+                    : "N/A"
+                }}
+              </p>
+              <p style="margin-left: 4px" class="repName mt-1">
+                Brand :
+                {{
+                  reviewdata.data.brandName ? reviewdata.data.brandName : "N/A"
+                }}
+              </p>
+            </div>
+          </div>
+          <p class="primary-text mb-0 f-w-600 mt-3" (click)="sendMessage()">
+            Send message
+          </p>
+          <p class="dark-color f-w-600 mb-0">
+            {{ reviewdata.data.practiceMobile }}
+          </p>
+          <p class="dark-color f-w-600 mb-0">
+            {{ reviewdata.data.practiceEmail }}
+          </p>
+          <p *ngIf="reviewdata.data.repId > 0" class="button1 f-w-600 mt-2">
+            Booked
+          </p>
+          <p
+            *ngIf="reviewdata.data.repId > 0 && !reviewdata.data.isConfirmed"
+            class="button2"
+            (click)="confirmAppointmnet()"
+          >
+            Confirm
+          </p>
+          <p
+            *ngIf="reviewdata.data.repId > 0 && reviewdata.data.isConfirmed"
+            class="button2 confirmButton"
+          >
+            Confirmed
+          </p>
+          <p
+            *ngIf="reviewdata.data.repId == 0"
+            class="confirm-btn f-w-600 mt-2"
+          >
+            Open
+          </p>
+        </div>
+        <div class="col-md-7">
+          <div class="box-info">
+            <i
+              *ngIf="isRepRole == false"
+              (click)="backToCal('edit')"
+              style="margin-right: 0px; margin-top: -10px; color: #4e73df"
+              class="fa fa-pencil-square-o fa-lg d-flex flex-row-reverse"
+            ></i>
+            <div>
+              <p class="d-flex align-items-center mb-2">
+                <span
+                  ><img
+                    class="custom-icon"
+                    src="assets/images/calicon.PNG"
+                    alt=""
+                /></span>
+                <span style="font-size: 14px" class="dark-color mini-title">{{
+                  reviewdata.data.displayDate
+                }}</span>
+              </p>
+              <p class="d-flex align-items-center mb-2">
+                <span>
+                  <img
+                    style="height: 28px; margin-right: 5px; margin-left: 2px"
+                    src="assets/images/timer.PNG"
+                    alt=""
+                  />
+                </span>
+                <span style="font-size: 14px" class="mini-title dark-color"
+                  >{{ reviewdata.data.appointmentTitle }}
+                  <span class="main"> @ </span>
+                  {{ reviewdata.data.startDisplayTime }} -
+                  {{ reviewdata.data.endDisplayTime }}
+                  {{ reviewdata.data.timeZoneAbbreviation }}
+                </span>
+              </p>
+              <p>
+                <span>
+                  <img
+                    style="height: 28px; margin-right: 5px; margin-left: 2px"
+                    src="assets/images/dinicon.PNG"
+                    alt=""
+                  />
+                </span>
+                <span class="main">Meal Count &nbsp;</span>
+                <span style="font-size: 14px" class="mini-title dark-color">{{
+                  reviewdata.data.mealCount
+                }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div *ngIf="isRepRole == false" class="col-12 text-center mt-3 mb-3">
+          <p>
+            <span
+              ><i
+                style="color: #4e73df"
+                class="fa fa-exchange fa-lg fav-icon"
+                aria-hidden="true"
+              ></i
+            ></span>
+            <span class="assigntext" (click)="transferRep()">Assign</span>
+          </p>
+        </div>
+        <div class="col-md-12 text-center mt-1">
+          <button
+            style="width: 180px"
+            class="btn btn-primary btn-cancel custom-hover-color"
+            (click)="backToCal('yes')"
+          >
+            Back to Calendar</button
+          >&nbsp;&nbsp;&nbsp;&nbsp;
+          <button
+            *ngIf="isRepRole == false"
+            style="width: 180px"
+            class="btn btn-primary btn-user"
+            (click)="backToCal('cancelappointment')"
+          >
+            Cancel Appointment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--In-office List View Appointment-->
+<div *ngIf="data?.action === 'ReviewList'">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-12 header">
+        <p class="heading">{{ reviewdata.data.appointmentTitle }}</p>
+        <i class="fa fa-times close-icon fa-lg" (click)="cancelDialog()"></i>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-md-6 text-center">
+          <img src="assets/images/profile.png" class="profile-Image" />
+          <p class="primary-text mb-0 f-w-600" (click)="sendMessage()">
+            Send message
+          </p>
+          <p class="dark-color f-w-600 mb-0">
+            {{ reviewdata.data.practiceMobile }}
+          </p>
+          <p class="dark-color f-w-600 mb-0">
+            {{ reviewdata.data.practiceEmail }}
+          </p>
+          <p *ngIf="reviewdata.data.repId > 0" class="button1 f-w-600 mt-2">
+            Booked
+          </p>
+          <p
+            *ngIf="reviewdata.data.repId > 0 && !reviewdata.data.isConfirmed"
+            class="button2"
+            (click)="confirmAppointmnet()"
+          >
+            Confirm
+          </p>
+          <p
+            *ngIf="reviewdata.data.repId > 0 && reviewdata.data.isConfirmed"
+            class="button2 confirmButton"
+          >
+            Confirmed
+          </p>
+          <p
+            *ngIf="reviewdata.data.repId == 0"
+            class="confirm-btn f-w-600 mt-2"
+          >
+            Open
+          </p>
+        </div>
+        <div class="col-md-6">
+          <div class="box-info">
+            <i
+              *ngIf="isRepRole == false"
+              (click)="backToCal('edit')"
+              style="margin-right: 0px; margin-top: -10px; color: #4e73df"
+              class="fa fa-pencil-square-o fa-lg d-flex flex-row-reverse"
+            ></i>
+            <div>
+              <p class="mini-title mb-0">
+                {{ reviewdata.data.firstName }} {{ reviewdata.data.lastName }}
+              </p>
+              <p style="margin-top: 7px" class="main">
+                {{ reviewdata.data.practiceName }}
+                <br />
+              </p>
+              <p style="margin-top: -10px" class="main">
+                {{ reviewdata.data.practiceAddress }}
+              </p>
+              <p style="margin-top: -10px" class="main">
+                {{ reviewdata.data.practiceCity }}
+                {{ reviewdata.data.practiceState }},{{
+                  reviewdata.data.practiceZipCode
+                }}
+              </p>
+              <p class="d-flex align-items-top mb-2">
+                <span>
+                  <img
+                    style="height: 25px; margin-right: 5px; margin-left: -3px"
+                    src="assets/images/medkit.PNG"
+                    alt=""
+                  />
+                </span>
+                <span style="font-size: 14px" class="main">
+                  <span style="font-size: 14px" class="mini-title dark-color">
+                    {{ reviewdata.data.physicianName }}
+                  </span>
+                  <br />
+                  {{ reviewdata.data.speciality }}
+                </span>
+              </p>
+              <p class="d-flex align-items-center mb-2">
+                <span
+                  ><img
+                    class="custom-icon"
+                    src="assets/images/calicon.PNG"
+                    alt=""
+                /></span>
+                <span style="font-size: 14px" class="dark-color mini-title">{{
+                  reviewdata.data.displayDate
+                }}</span>
+              </p>
+              <p class="d-flex align-items-center mb-2">
+                <span>
+                  <img
+                    style="height: 28px; margin-right: 5px; margin-left: 2px"
+                    src="assets/images/timer.PNG"
+                    alt=""
+                  />
+                </span>
+                <span style="font-size: 14px" class="mini-title dark-color"
+                  >{{ reviewdata.data.appointmentTitle }}
+                  <span class="main"> @ </span>
+                  {{ reviewdata.data.displayTime }}</span
+                >
+              </p>
+              <p>
+                <span>
+                  <img
+                    style="height: 28px; margin-right: 5px; margin-left: 2px"
+                    src="assets/images/dinicon.PNG"
+                    alt=""
+                  />
+                </span>
+                <span class="main">Meal Count &nbsp;</span>
+                <span style="font-size: 14px" class="mini-title dark-color">{{
+                  reviewdata.data.mealCount
+                }}</span>
+              </p>
+              <div>
+                <p class="d-flex align-items-top">
+                  <span>
+                    <img
+                      style="height: 15px; margin-right: 5px; margin-left: 2px"
+                      src="assets/images/note.PNG"
+                      alt=""
+                    />
+                  </span>
+                  <span class="main">Note &nbsp;</span>
+                  <span style="font-size: 14px" class="mini-title dark-color">{{
+                    reviewdata.data.notes
+                  }}</span>
+                </p>
+                <p class="in-icon">
+                  <span>
+                    <img
+                      src="assets/images/office-folder.svg"
+                      (click)="openOfficePolicieslistview('office')"
+                    />
+                    <img
+                      src="assets/images/food-tray.svg"
+                      (click)="openOfficePolicieslistview('meal')"
+                    />
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <button
+            style="width: 180px"
+            class="btn btn-primary btn-cancel custom-hover-color"
+            (click)="backToCal('yes')"
+          >
+            Back to Calendar</button
+          >&nbsp;&nbsp;&nbsp;&nbsp;
+          <button
+            style="width: 120px"
+            class="btn btn-primary btn-user"
+            (click)="backToCal('no')"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Book appointment view for reps-->
+<!-- <div style="overflow-x: hidden" *ngIf="data?.action === 'book'"> -->
+<div style="overflow-x: hidden" *ngIf="data?.action === 'book'">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-12 header">
+        <p class="heading">{{ bookdata.title }}</p>
+        <!-- <i
+          *ngIf="!isCalendarClosed()"
+          class="fa fa-times close-icon fa-lg"
+          (click)="cancelDialog()"
+        ></i>
+        <p
+          *ngIf="isCalendarClosed()"
+          style="
+            color: white;
+            display: inline-block;
+            text-align: center;
+            margin-right: 104px;
+            font-size: 16px;
+          "
+          class="heading"
+        >
+          OPENS AT
+          {{
+            convertFrom24To12Format(
+              bookdata.extendedProps.doNotReleaseBeforeTime
+            )
+          }},&nbsp;{{
+            bookdata.extendedProps.doNotReleaseBeforeDate
+              | date : "EEEE, MMM d, y"
+          }}
+        </p> -->
+        <!-- <div
+          *ngIf="
+            bookdata.extendedProps.doNotReleaseBeforeDate != null &&
+            bookdata.extendedProps.doNotReleaseBeforeTime != null
+          "
+        >
+          <i
+            *ngIf="!isCalendarClosed()"
+            class="fa fa-times close-icon fa-lg"
+            (click)="cancelDialog()"
+          ></i>
+          <p
+            *ngIf="isCalendarClosed()"
+            style="
+              color: white;
+              display: inline-block;
+              text-align: center;
+              margin-right: 104px;
+              font-size: 16px;
+            "
+            class="heading"
+          >
+            OPENS AT
+            {{
+              convertFrom24To12Format(
+                bookdata.extendedProps.doNotReleaseBeforeTime
+              )
+            }},&nbsp;{{
+              bookdata.extendedProps.doNotReleaseBeforeDate
+                | date : "EEEE, MMM d, y"
+            }}
+          </p>
+        </div> -->
+        <div
+          *ngIf="
+            bookdata.extendedProps.doNotReleaseBeforeDate != null &&
+            bookdata.extendedProps.doNotReleaseBeforeTime != null
+          "
+        >
+          <i
+            *ngIf="!isCalendarClosed()"
+            class="fa fa-times close-icon fa-lg"
+            (click)="cancelDialog()"
+          ></i>
+          <p
+            *ngIf="isCalendarClosed()"
+            style="
+              color: white;
+              display: inline-block;
+              text-align: center;
+              margin-right: 104px;
+              font-size: 16px;
+            "
+            class="heading"
+          >
+            OPENS AT
+            {{
+              convertFrom24To12Format(
+                bookdata.extendedProps.doNotReleaseBeforeTime
+              )
+            }},&nbsp;{{
+              bookdata.extendedProps.doNotReleaseBeforeDate
+                | date : "EEEE, MMM d, y"
+            }}
+          </p>
+        </div>
+      </div>
+      <!-- Your existing code -->
+    </div>
+  </div>
+  <div class="row modal-body">
+    <div class="col-md-5 justify-content-center">
+      <img class="userimage" src="assets/images/profile.png" />
+      <div
+        style="justify-content: center; align-items: center"
+        class="col-md-12 d-flex mt-4"
+      >
+        <div
+          style="background-color: #2754d6"
+          class="in-icon"
+          (click)="openOfficePolicies('office')"
+        >
+          <img src="assets/images/food-tray.png" alt="Office Policies" />
+        </div>
+        <div
+          style="background-color: #f6c23e; margin-left: 10px"
+          class="in-icon"
+          (click)="openOfficePolicies('meal')"
+        >
+          <img src="assets/images/forks.png" alt="Meal Preferences" />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-7">
+      <div *ngIf="appointmentLimitCount != -1" style="margin-top: -28px">
+        <p style="color: black">
+          <strong>
+            <!-- <b>
+            Appointments
+           <span
+              id="bookingLimit"
+              style="float: right;"
+              >{{ appointmentLimitCount }} /
+              {{ bookdata.extendedProps.bookingLimit }}</span
+            >
+          </b> -->
+            Appointments
+          </strong>
+          <span id="bookingLimit" style="float: right"
+            >{{ appointmentLimitCount }} /
+            {{ bookdata.extendedProps.bookingLimit }}</span
+          >
+        </p>
+        <!-- Bootstrap progress bar -->
+        <div class="progress">
+          <div
+            id="progressBar"
+            class="progress-bar"
+            role="progressbar"
+            [ngClass]="{
+              filled:
+                appointmentLimitCount == bookdata.extendedProps.bookingLimit
+            }"
+            [style.width.%]="
+              (appointmentLimitCount / bookdata.extendedProps.bookingLimit) *
+              100
+            "
+            [attr.aria-valuenow]="
+              (appointmentLimitCount / bookdata.extendedProps.bookingLimit) *
+              100
+            "
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div>
+          <!-- <div
+            id="progressBar"
+            class="progress-bar"
+            role="progressbar"
+            [ngClass]="{'filled': appointmentLimitCount == bookdata.extendedProps.bookingLimit}"
+            [style.width.%]="(appointmentLimitCount / bookdata.extendedProps.bookingLimit) * 100"
+            [attr.aria-valuenow]="(appointmentLimitCount / bookdata.extendedProps.bookingLimit) * 100 - 1"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div> -->
+        </div>
+      </div>
+      <br />
+      <div class="eventinfo">
+        <div>
+          <p class="d-flex align-items-top mb-3">
+            <span>
+              <img
+                style="height: 28px; margin-right: 5px; margin-left: -3px"
+                src="assets/images/location.PNG"
+                alt=""
+              />
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color">
+              {{ bookdata.extendedProps.practiceName }}
+              <br />
+              {{ bookdata.extendedProps.practiceAddress }}
+              <br />
+              {{ bookdata.extendedProps.practiceCity }},
+              {{ bookdata.extendedProps.practiceState }}
+              {{ bookdata.extendedProps.practiceZipCode }}
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <img
+                style="height: 25px; margin-right: 5px; margin-left: -3px"
+                src="assets/images/medkit.PNG"
+                alt=""
+              />
+            </span>
+            <span style="font-size: 14px" class="main">
+              <span style="font-size: 14px" class="mini-title dark-color">
+                {{ bookdata.extendedProps.physicianName }}
+              </span>
+              <br />
+              {{ bookdata.extendedProps.speciality }}
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span style="margin-top: 5px" class="greenDot"> </span>
+            <span style="font-size: 14px" class="main">
+              <span
+                style="font-size: 14px; margin-left: 15px"
+                class="mini-title dark-color"
+              >
+                {{ bookdata.extendedProps.videoMeeting }}
+              </span>
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <img class="custom-icon" src="assets/images/calicon.PNG" alt="" />
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color">
+              {{ bookdata.extendedProps.displayDate }}
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <img
+                style="height: 28px; margin-right: 5px; margin-left: 2px"
+                src="assets/images/timer.PNG"
+                alt=""
+              />
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color mt-1">
+              {{ bookdata.title }}
+              <!-- <span style="font-size: 14px" class="main"> At </span> -->
+              <span style="font-size: 14px" class="main"> @ </span>
+              <!-- {{ bookdata.extendedProps.starttime }}
+              {{ bookdata.extendedProps.startPeriod }} -->
+              {{ bookdata.extendedProps.starttime }}
+              {{ bookdata.extendedProps.startPeriod.toUpperCase() }} -
+              {{ bookdata.extendedProps.endtime }}
+              {{ bookdata.extendedProps.endPeriod.toUpperCase() }}
+              {{ bookdata.extendedProps.timeZoneAbbreviation }}
+            </span>
+          </p>
+          <!-- <p>
+            <span style="font-size: 14px" class="mini-title dark-color mt-1">
+              <span style="font-size: 14px" class="main" *ngIf="isButtonDisabled()"> Appointments Openning soon 
+                {{ bookdata.extendedProps.startDateCalendar| date:'MM-dd-yyyy' }}
+                {{ bookdata.extendedProps.endDateCalendar | date:'MM-dd-yyyy'}}
+              </span>
+            </span>
+          </p> -->
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <img
+                style="height: 28px; margin-right: 5px; margin-left: 2px"
+                src="assets/images/dinicon.PNG"
+                alt=""
+              />
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color mt-1">
+              <span style="font-size: 14px" class="main"> Meal Count </span
+              >{{ bookdata.extendedProps.mealCount }}
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <img
+                style="height: 20px; margin-right: 5px; margin-left: 2px"
+                src="assets/images/note.PNG"
+                alt=""
+              />
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color mt-1">
+              Note
+            </span>
+          </p>
+          <p style="margin-left: 25px">{{ bookdata.extendedProps.notes }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row modal-body">
+    <form (submit)="submitappointment('submitted')">
+      <div [formGroup]="bookrepFormGroup">
+        <div class="row">
+          <div class="col-12">
+            <label class="mylabel" for="">Mobile</label
+            ><label style="color: red; margin-left: 3px" class="mendatory-star">
+              *</label
+            >
+          </div>
+          <div>
+            <mat-form-field class="col-12" appearance="outline">
+              <input
+                matInput
+                id="mobileNum"
+                name="mobileNum"
+                formControlName="mobileNum"
+              />
+            </mat-form-field>
+            <div
+              class="form-validation-message"
+              *ngIf="
+                mobileNum?.invalid && (mobileNum?.dirty || mobileNum?.touched)
+              "
+            >
+              <small
+                class="text-danger"
+                *ngIf="mobileNum?.errors?.['required']"
+              >
+                Mobile is Required.</small
+              >
+              <small class="text-danger" *ngIf="mobileNum?.errors?.['pattern']">
+                Mobile Number should be of 10 digits</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex justify-content-center">
+          <p class="main" style="margin-top: -17px">
+            We will send appointment-related communication to this number
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 d-flex justify-content-center">
+          <button
+            type="button"
+            class="btn btn-primary btn-cancel custom-hover-color"
+            (click)="cancelDialog()"
+          >
+            Cancel
+          </button>
+          <!-- <button
+            type="submit"
+            *ngIf="!isCalendarClosed()"
+            class="btn btn-primary btn-ok"
+            [disabled]="false"
+          >
+            Book Now
+          </button>
+          <button
+            type="button"
+            *ngIf="isCalendarClosed()"
+            class="btn btn-primary btn-ok"
+            [disabled]="true"
+          >
+            Book Now
+          </button> -->
+          <button
+            type="submit"
+            *ngIf="!isCalendarClosed()"
+            class="btn btn-primary btn-ok"
+            [disabled]="false"
+          >
+            Book Now
+          </button>
+
+          <button
+            type="button"
+            *ngIf="isCalendarClosed()"
+            class="btn btn-primary btn-ok"
+            [disabled]="true"
+          >
+            Book Now
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!--Booking Appointment Confirmation Data-->
+
+<div style="overflow-x: hidden" *ngIf="bookconfdata?.action === 'bookconfirm'">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-12 header">
+        <p class="heading">{{ bookconfdata.title }}</p>
+        <i class="fa fa-times close-icon fa-lg" (click)="cancelDialog()"></i>
+      </div>
+    </div>
+  </div>
+  <div class="row modal-body">
+    <div class="col-md-5 d-flex justify-content-center">
+      <img class="userimage" src="assets/images/profile.png" />
+    </div>
+    <div class="col-md-7">
+      <div class="eventinfo">
+        <div>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <i class="fa fa-map-marker fav-icon" aria-hidden="true"></i>
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color">
+              Montgomery Cancer Center 4145 Carmichael Rd Montgomery, AL 3616
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <i class="fa fa-medkit fav-icon" aria-hidden="true"></i>
+            </span>
+            <span style="font-size: 14px" class="main">
+              <span style="font-size: 14px" class="mini-title dark-color">
+                Dr Kevin Banks
+              </span>
+              <br />
+              General Surgeon
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <i class="fa fa-calendar-o fav-icon" aria-hidden="true"></i>
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color">
+              Thurs, 22 JUN, 2022
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <i class="fa fa-clock-o fav-icon" aria-hidden="true"></i>
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color">
+              {{ bookconfdata.title }}
+              <span style="font-size: 14px" class="main"> @ </span>
+              <!-- {{ bookconfdata.extendedProps.starttime }}
+              {{ bookconfdata.extendedProps.startPeriod }} -->
+              {{ formattedTime }}
+            </span>
+          </p>
+          <p class="d-flex align-items-top mb-2">
+            <span>
+              <i class="fa fa-cutlery fav-icon" aria-hidden="true"></i>
+            </span>
+            <span style="font-size: 14px" class="mini-title dark-color">
+              <span style="font-size: 14px" class="main"> Meal Count </span>
+              {{ bookconfdata.extendedProps.mealCount }}
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row btnfooter">
+    <div class="col-12 d-flex justify-content-center mt-2">
+      <button
+        type="submit"
+        class="btn btn-primary btn-cancel"
+        (click)="cancelDialog()"
+      >
+        Cancel
+      </button>
+      <button
+        style="width: 140px !important"
+        type="submit"
+        class="btn btn-primary btn-ok"
+        (click)="backToCal('yes')"
+      >
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
+
+<!--Select Rep Popup-->
+<div
+  style="overflow-x: hidden"
+  *ngIf="
+    selectRepdata?.action === 'selectRep' ||
+    selectRepdata?.action === 'EditselectRep' ||
+    transferRepdata?.action === 'transferRep' ||
+    action === 'view-assign-rep'
+  "
+>
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-md-12 header">
+        <p class="heading">{{ button }} Rep</p>
+        <i class="fa fa-times close-icon fa-lg" (click)="cancelRepDialog()"></i>
+      </div>
+    </div>
+  </div>
+  <div class="row modal-body">
+    <div class="col-md-12">
+      <label class="mylabel">{{ button }} Rep</label>
+      <form [formGroup]="repFormGroup" (submit)="assignRep()">
+        <mat-form-field class="col-md-12 col-12" appearance="outline">
+          <input
+            type="text"
+            placeholder="Select Rep"
+            matInput
+            [matAutocomplete]="auto"
+            (keyup)="onKeySearch($event)"
+            formControlName="repName"
+          />
+          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option
+              *ngFor="let rep of reps"
+              [value]="rep.firstName + ' ' + rep.lastName"
+            >
+              {{ rep.firstName }} {{ rep.lastName }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <div class="row btnfooter mt-3">
+          <div class="col-12 d-flex justify-content-center">
+            <button
+              style="width: 120px"
+              type="submit"
+              class="btn btn-primary btn-ok"
+            >
+              {{ button }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-cancel custom-hover-color"
+              (click)="cancelRepDialog()"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<mat-dialog-actions align="end"> </mat-dialog-actions>
